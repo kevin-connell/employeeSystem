@@ -97,7 +97,7 @@ const addMenu = () => {
             case "DEPARTMENT":
                 inquirer.prompt([
                     {
-                        name: "dept",
+                        name: "name",
                         type: "input",
                         message: "What is the name of the department?"
                     }
@@ -124,8 +124,8 @@ const addEmployees = async (employeeObj) => {
 }
 
 const addDepartments = async (deptObj) => {
-    await db.createDepartment(`[${deptObj.dept}]`);
-    console.log(something + " created");
+    await db.createDepartment(deptObj);
+    console.log(deptObj.name + " was successfully added")
     mainMenu();
 }
 

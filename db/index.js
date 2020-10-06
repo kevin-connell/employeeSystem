@@ -33,21 +33,20 @@ class DB {
     }
 
     createDepartment(input) {
-        console.log(input)
         return this.connection.query("INSERT INTO department SET ?", input);
     }
 
     removeEmployee(employeeId) {
         return this.connection.query(
-        "DELETE FROM employee WHERE id = ?",
-        employeeId
+            "DELETE FROM employee WHERE id = ?",
+            employeeId
         );
     }
 
     updateEmployeeRole(employeeId, roleId) {
         return this.connection.query(
-        "UPDATE employee SET role_id = ? WHERE id = ?",
-        [roleId, employeeId]
+            "UPDATE employee SET role_id = ? WHERE id = ?",
+            [roleId, employeeId]
         );
     }
 
