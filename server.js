@@ -1,20 +1,13 @@
-//const mysql = require("mysql");
 const inquirer = require("inquirer");
 const db = require("./db");
 require("console.table");
-
-///connection.connect(err => {
-//if (err)
-//throw err;
-
-//});
 
 const mainMenu = () => {
     inquirer.prompt([
         {
             name: "menuChoice",
             type: "list",
-            choices: ["VIEW", "ADD", "UPDATE", "DELETE", "EXIT"],
+            choices: ["VIEW", "ADD", "UPDATE", "EXIT"],
             message: "What would you like to do?"
         }
     ]).then(({ menuChoice }) => {
@@ -48,7 +41,7 @@ const viewMenu = () => {
             message: "Please choose a metheod to search by:"
         }
     ]).then(({ menuChoice }) => {
-        // search by menuChoice
+
         switch (menuChoice) {
             case "ALL EMPLOYEES":
                 viewEmployees();
@@ -84,9 +77,15 @@ const viewRoles = async () => {
 }
 
 const addMenu = async () => {
-    let dArr = await arrayDepartments()
-    let rArr = await arrayRoles()
-    let eArr = await arrayEmployees()
+    let dArr = await arrayDepartments();
+    let rArr = await arrayRoles();
+    let eArr = await arrayEmployees();
+
+    if (eArr.length == []) {
+        eArr = [{name: "THEMSELVES", value: null}];
+    } else {
+        eArr.unshift({name: "THEMSELVES", value: null})
+    };
 
     inquirer.prompt([
         {
@@ -132,7 +131,7 @@ const addMenu = async () => {
                         addRoles(answer);
                     });
                 } else {
-                    console.log("There are no departments to add a role to. Please add a DEPARTMENT before adding a ROLE!");
+                    console.log('\x1b[31m%s\x1b[0m', "\nThere are no departments... Please add a DEPARTMENT before adding a ROLE!\n");
                     addMenu()
                 }
                 break;
@@ -166,7 +165,7 @@ const addMenu = async () => {
                         addEmployees(answer);
                     });
                 } else {
-                    console.log("There are no roles to fill. Please add a ROLE before adding an EMPLOYEE!");
+                    console.log('\x1b[31m%s\x1b[0m', "\nThere are no roles... Please add a ROLE before adding an EMPLOYEE!\n");
                     addMenu()
                 }
                 break;
@@ -176,7 +175,7 @@ const addMenu = async () => {
 
 const addDepartments = async (deptObj) => {
     await db.createDepartment(deptObj);
-    console.log(deptObj.name + " was added")
+    console.log('\x1b[32m%s\x1b[0m', "\n" + deptObj.name + " was added!\n")
     mainMenu();
 }
 
@@ -189,7 +188,7 @@ const arrayDepartments = async () => {
 
 const addRoles = async (roleObj) => {
     await db.createRole(roleObj);
-    console.log(roleObj.title + " was added")
+    console.log('\x1b[32m%s\x1b[0m', "\n" + roleObj.title + " was added!\n")
     mainMenu();
 }
 
@@ -202,7 +201,7 @@ const arrayRoles = async () => {
 
 const addEmployees = async (employeeObj) => {
     await db.createEmployee(employeeObj);
-    console.log(employeeObj.first_name + " " + employeeObj.last_name + " was added");
+    console.log('\x1b[32m%s\x1b[0m', "\n" + employeeObj.first_name + " " + employeeObj.last_name + " was added!\n");
     mainMenu();
 }
 
@@ -250,8 +249,6 @@ const updateMenu = async () => {
         }
     ]).then((answers) => {
         if (answers.role_id) {
-            console.log(answers.employee_id);
-            console.log(answers.role_id);
             updateRole(answers.employee_id , answers.role_id)
         }else{
             updateManager(answers.employee_id , answers.manager_id)
@@ -260,16 +257,14 @@ const updateMenu = async () => {
 };
 
 const updateRole = async (a, b) => {
-    console.log(a + b)
     await db.updateEmployeeRole(a, b);
-    console.log("Complete!");
+    console.log('\x1b[32m%s\x1b[0m', "\nComplete!\n");
     mainMenu();
 }
 
 const updateManager = async (a, b) => {
-    console.log(a + b)
     await db.updateEmployeeManager(a, b);
-    console.log("Complete!");
+    console.log('\x1b[32m%s\x1b[0m', "\nComplete!\n");
     mainMenu();
 }
 
