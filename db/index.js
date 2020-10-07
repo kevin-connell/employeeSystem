@@ -27,9 +27,24 @@ class DB {
         );
     }
 
+    listDepartments(){
+        return this.connection.query(`SELECT department.name AS name, department.id AS value FROM department`);
+    }
+
+    listRoles(){
+        return this.connection.query(`SELECT role.title AS name, role.id AS value FROM role`);
+    }
+
+    listEmployees(){
+        return this.connection.query(`SELECT CONCAT(employee.first_name, ' ', employee.last_name) AS name, employee.id AS value FROM employee`);
+    }
 
     createEmployee(input) {
         return this.connection.query("INSERT INTO employee SET ?", input);
+    }
+
+    createRole(input) {
+        return this.connection.query("INSERT INTO role SET ?", input);
     }
 
     createDepartment(input) {

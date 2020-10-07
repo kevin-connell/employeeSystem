@@ -83,7 +83,14 @@ const viewRoles = async () => {
     mainMenu();
 }
 
-const addMenu = () => {
+const addMenu = async () => {
+    let dArr = await arrayDepartments()
+    console.log(dArr)
+    let rArr = await arrayRoles()
+    console.log(rArr)
+    let eArr = await arrayEmployees()
+    console.log(eArr)
+
     inquirer.prompt([
         {
             name: "menuChoice",
@@ -92,7 +99,6 @@ const addMenu = () => {
             message: "What would you like to add?"
         }
     ]).then(({ menuChoice }) => {
-        // add by menuChoice
         switch (menuChoice) {
             case "DEPARTMENT":
                 inquirer.prompt([
@@ -107,32 +113,107 @@ const addMenu = () => {
                 break;
 
             case "ROLE":
-                addRoles();
+                if (dArr.length > 0) {
+                    inquirer.prompt([
+                        {
+                            name: "title",
+                            type: "input",
+                            message: "What is the name of the role?"
+                        },
+                        {
+                            name: "salary",
+                            type: "input",
+                            message: "What is the yearly salary of this role?"
+                        }, 
+                        {
+                            name: "department_id",
+                            type: "list",
+                            choices: dArr,
+                            message: "Of which department does it belong?"
+                        }
+                    ]).then((answer) => {
+                        addRoles(answer);
+                    });
+                }else{
+                    console.log("There are no departments to add a role to. Please add a DEPARTMENT before adding a ROLE!");
+                    addMenu()
+                }
                 break;
 
             case "EMPLOYEE":
-                addEmployees();
+                if (rArr.length > 0) {
+                    inquirer.prompt([
+                        {
+                            name: "first_name",
+                            type: "input",
+                            message: "What is their first name?"
+                        },
+                        {
+                            name: "last_name",
+                            type: "input",
+                            message: "What is their last name?"
+                        }, 
+                        {
+                            name: "role_id",
+                            type: "list",
+                            choices: rArr,
+                            message: "Of which role do the take?"
+                        },
+                        {
+                            name: "manager_id",
+                            type: "list",
+                            choices: eArr,
+                            message: "Who is their manager?"
+                        }
+                    ]).then((answer) => {
+                        addEmployees(answer);
+                    });
+                }else{
+                    console.log("There are no roles to fill. Please add a ROLE before adding an EMPLOYEE!");
+                    addMenu()
+                }
                 break;
         }
     });
 };
 
-const addEmployees = async (employeeObj) => {
-    await db.createEmloyee(`(${employeeObj.first_name}, ${employeeObj.last_name}, blacccdsdsfg )`);
-    console.log(employeeObj.first_name + " saved");
-    mainMenu();
-}
-
 const addDepartments = async (deptObj) => {
     await db.createDepartment(deptObj);
-    console.log(deptObj.name + " was successfully added")
+    console.log(deptObj.name + " was added")
     mainMenu();
 }
 
-const addRoles = async () => {
-    const roles = await db.createRole();
-    console.table(roles);
+const arrayDepartments = async () => {
+    let departmentList = await db.listDepartments();
+    departmentList = JSON.stringify(departmentList);
+    departmentList = JSON.parse(departmentList);
+    return departmentList;
+}
+
+const addRoles = async (roleObj) => {
+    await db.createRole(roleObj);
+    console.log(roleObj.name + " was added")
     mainMenu();
+}
+
+const arrayRoles = async () => {
+    let roleList = await db.listRoles();
+    roleList = JSON.stringify(roleList);
+    roleList = JSON.parse(roleList);
+    return roleList;
+}
+
+const addEmployees = async (employeeObj) => {
+    await db.createEmployee(employeeObj);
+    console.log(employeeObj.first_name + " " + employeeObj.last_name + " was added");
+    mainMenu();
+}
+
+const arrayEmployees = async () => {
+    let employeeList = await db.listEmployees();
+    employeeList = JSON.stringify(employeeList);
+    employeeList = JSON.parse(employeeList);
+    return employeeList;
 }
 
 const updateMenu = () => {
@@ -166,35 +247,3 @@ const deleteMenu = () => {
         mainMenu()
     });
 };
-
-// const yearRangeSearch = () => {
-// 	inquirer.prompt([
-// 		{
-// 			name: "startingYear",
-// 			type: "input",
-// 			message: "Starting year for search:"
-// 		},
-// 		{
-// 			name: "endingYear",
-// 			type: "input",
-// 			message: "Ending year for search:"
-// 		}
-// 	]).then((responce) => {
-// 		if (responce.endingYear >= responce.startingYear) {
-
-// 			console.log(`Displaying results from ${responce.startingYear}-${responce.endingYear}:`);
-
-// 			connection.query(`SELECT top5000.position, top5000.artist, top5000.song, top5000.year FROM top5000 WHERE top5000.year > ${parseInt(responce.startingYear) - 1} AND top5000.year < ${parseInt(responce.endingYear) + 1}`, function (err, songData) {
-// 				if (err)
-// 					throw err;
-
-// 				top
-// 				console.log();
-// 				mainMenu()
-// 			});
-// 		} else {
-// 			console.log("Input invalid!")
-// 			mainMenu()
-// 		};
-// 	});
-// };
