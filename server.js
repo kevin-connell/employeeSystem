@@ -85,11 +85,8 @@ const viewRoles = async () => {
 
 const addMenu = async () => {
     let dArr = await arrayDepartments()
-    console.log(dArr)
     let rArr = await arrayRoles()
-    console.log(rArr)
     let eArr = await arrayEmployees()
-    console.log(eArr)
 
     inquirer.prompt([
         {
@@ -124,7 +121,7 @@ const addMenu = async () => {
                             name: "salary",
                             type: "input",
                             message: "What is the yearly salary of this role?"
-                        }, 
+                        },
                         {
                             name: "department_id",
                             type: "list",
@@ -134,7 +131,7 @@ const addMenu = async () => {
                     ]).then((answer) => {
                         addRoles(answer);
                     });
-                }else{
+                } else {
                     console.log("There are no departments to add a role to. Please add a DEPARTMENT before adding a ROLE!");
                     addMenu()
                 }
@@ -152,7 +149,7 @@ const addMenu = async () => {
                             name: "last_name",
                             type: "input",
                             message: "What is their last name?"
-                        }, 
+                        },
                         {
                             name: "role_id",
                             type: "list",
@@ -168,7 +165,7 @@ const addMenu = async () => {
                     ]).then((answer) => {
                         addEmployees(answer);
                     });
-                }else{
+                } else {
                     console.log("There are no roles to fill. Please add a ROLE before adding an EMPLOYEE!");
                     addMenu()
                 }
@@ -192,7 +189,7 @@ const arrayDepartments = async () => {
 
 const addRoles = async (roleObj) => {
     await db.createRole(roleObj);
-    console.log(roleObj.name + " was added")
+    console.log(roleObj.title + " was added")
     mainMenu();
 }
 
@@ -216,34 +213,157 @@ const arrayEmployees = async () => {
     return employeeList;
 }
 
-const updateMenu = () => {
+const updateMenu = async () => {
+    let eArr = await arrayEmployees();
+    let rArr = await arrayRoles();
+
     inquirer.prompt([
+        {
+            name: "employee_id",
+            type: "list",
+            choices: eArr,
+            message: "Who would you like to update?"
+        },
         {
             name: "menuChoice",
             type: "list",
-            choices: ["MANAGER", "ROLE"],
+            choices: ["ROLE", "MANAGER"],
             message: "What would you like to update?"
-        }
-    ]).then(({ menuChoice }) => {
-        // update by menuChoice
-
-
-        mainMenu()
-    });
-};
-
-const deleteMenu = () => {
-    inquirer.prompt([
+        },
         {
-            name: "menuChoice",
+            name: "role_id",
             type: "list",
-            choices: ["DEPARTMENT", "ROLE", "EMPLOYEE"],
-            message: "What would you like to update?"
+            choices: rArr,
+            message: "What role are they now?",
+            when: function (answers) {
+                return answers.menuChoice == "ROLE";
+            }
+        },
+        {
+            name: "manager_id",
+            type: "list",
+            choices: eArr,
+            message: "Who is their manager?",
+            when: function (answers) {
+                return answers.menuChoice == "MANAGER";
+            }
         }
-    ]).then(({ menuChoice }) => {
-        // delete by menuChoice
-
-
-        mainMenu()
+    ]).then((answers) => {
+        if (answers.role_id) {
+            console.log(answers.employee_id);
+            console.log(answers.role_id);
+            updateRole(answers.employee_id , answers.role_id)
+        }else{
+            updateManager(answers.employee_id , answers.manager_id)
+        }
     });
 };
+
+const updateRole = async (a, b) => {
+    console.log(a + b)
+    await db.updateEmployeeRole(a, b);
+    console.log("Complete!");
+    mainMenu();
+}
+
+const updateManager = async (a, b) => {
+    console.log(a + b)
+    await db.updateEmployeeManager(a, b);
+    console.log("Complete!");
+    mainMenu();
+}
+
+// const deleteMenu = async () => {
+//     let dArr = await arrayDepartments()
+//   
+//     let rArr = await arrayRoles()
+//   
+//     let eArr = await arrayEmployees()
+//     console.log(eArr)
+
+//     inquirer.prompt([
+//         {
+//             name: "menuChoice",
+//             type: "list",
+//             choices: ["DEPARTMENT", "ROLE", "EMPLOYEE"],
+//             message: "What would you like to delete?"
+//         }
+//     ]).then(({ menuChoice }) => {
+//         switch (menuChoice) {
+//             case "DEPARTMENT":
+//                 inquirer.prompt([
+//                     {
+//                         name: "department_id",
+//                         type: "list",
+//                         choices: dArr,
+//                         message: "Which department would you like to delete?"
+//                     }
+//                 ]).then((answer) => {
+//                     deleteDepartments(answer.department_id);
+//                 });
+//                 break;
+
+//             case "ROLE":
+//                 if (dArr.length > 0) {
+//                     inquirer.prompt([
+//                         {
+//                             name: "title",
+//                             type: "input",
+//                             message: "What is the name of the role?"
+//                         },
+//                         {
+//                             name: "salary",
+//                             type: "input",
+//                             message: "What is the yearly salary of this role?"
+//                         },
+//                         {
+//                             name: "department_id",
+//                             type: "list",
+//                             choices: dArr,
+//                             message: "Of which department does it belong?"
+//                         }
+//                     ]).then((answer) => {
+//                         addRoles(answer);
+//                     });
+//                 } else {
+//                     console.log("There are no departments to add a role to. Please add a DEPARTMENT before adding a ROLE!");
+//                     addMenu()
+//                 }
+//                 break;
+
+//             case "EMPLOYEE":
+//                 if (rArr.length > 0) {
+//                     inquirer.prompt([
+//                         {
+//                             name: "first_name",
+//                             type: "input",
+//                             message: "What is their first name?"
+//                         },
+//                         {
+//                             name: "last_name",
+//                             type: "input",
+//                             message: "What is their last name?"
+//                         },
+//                         {
+//                             name: "role_id",
+//                             type: "list",
+//                             choices: rArr,
+//                             message: "Of which role do the take?"
+//                         },
+//                         {
+//                             name: "manager_id",
+//                             type: "list",
+//                             choices: eArr,
+//                             message: "Who is their manager?"
+//                         }
+//                     ]).then((answer) => {
+//                         addEmployees(answer);
+//                     });
+//                 } else {
+//                     console.log("There are no roles to fill. Please add a ROLE before adding an EMPLOYEE!");
+//                     addMenu()
+//                 }
+//                 break;
+//         }
+//     });
+// };
